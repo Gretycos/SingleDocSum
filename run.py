@@ -5,7 +5,8 @@ Usage:
 
 Options:
     -h --help                               show this screen.
-    --days=<int>                            load data from days ago [default: 88]
+    --days=<int>                            load data from days ago [default: 1]
+    --all
 """
 import json
 from docopt import docopt
@@ -61,7 +62,7 @@ def aggregate(days):
 
     # cursor = session.execute("select DATE_FORMAT(publish_time,'%Y-%m-%d') as d, count(article_id) as nums "
     #                          "from news "
-    #                          "where publish_time > '2020-12-12' "
+    #                          "where publish_time > '2021-01-29' "
     #                          "group by DATE_FORMAT(publish_time,'%Y-%m-%d') "
     #                          "order by d desc ")
 
@@ -111,15 +112,34 @@ def aggregate(days):
             logger.error("回滚汇总: {}".format(e))
             session.rollback()
 
-
     session.commit()
     session.close()
 
+def remove_data(days):
+    session = load_session()
+    target_date = datetime.now().date() + timedelta(days=-days)
+    try:
+        session.execute("delete from news_summary "
+                        "where DATE_FORMAT(publish_time,'%Y-%m-%d') = '{}'".format(target_date))
+        session.execute("delete from news_info "
+                        "where publish_date = '{}'".format(target_date))
+    except Exception as e:
+        logger.error("回滚清除: {}".format(e))
+        session.rollback()
+    session.commit()
+    session.close()
+
+
 def main():
     args = docopt(__doc__)
+    # logger.info(args)
     access_token = getAccessToken()
-    parseDoc(access_token,int(args['--days']))
-    aggregate(int(args['--days']))
+    for day in range(int(args['--days']),0,-1):
+        if args['--all']:
+            remove_data(day)
+        parseDoc(access_token, day)
+        aggregate(day)
+
 
 if __name__ == '__main__':
     main()
