@@ -9,6 +9,7 @@ Options:
     --all
 """
 import json
+import os
 from docopt import docopt
 import time
 from datetime import datetime, timedelta
@@ -134,6 +135,14 @@ def main():
     args = docopt(__doc__)
     # logger.info(args)
     access_token = getAccessToken()
+    if int(args['--days']) == 0:
+        target_date = datetime.now().date()
+        if os.path.exists("../TopicDiscovery/predict/top/{}.json".format(target_date)):
+            remove_data(int(args['--days']))
+            parseDoc(access_token, int(args['--days']))
+            aggregate(int(args['--days']))
+        else:
+            logger.error("not found today's topic model")
     for day in range(int(args['--days']),0,-1):
         if args['--all']:
             remove_data(day)

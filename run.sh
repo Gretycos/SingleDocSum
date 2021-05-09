@@ -24,7 +24,7 @@ if [ $perform_mode = "generate" ]; then
           python run.py --days="$days_before" --all
       fi
   else
-    if [ "$days_before" = 1 ]; then
+    if [ "$days_before" -ge 0 ]; then
         python run.py --days="$days_before"
     fi
   fi
