@@ -143,6 +143,7 @@ def main():
             aggregate(int(args['--days']))
         else:
             logger.error("not found today's topic model")
+            return
     for day in range(int(args['--days']),0,-1):
         if args['--all']:
             remove_data(day)
