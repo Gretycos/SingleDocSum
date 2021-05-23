@@ -116,7 +116,7 @@ def aggregate(days):
     session.commit()
     session.close()
 
-def remove_data(days):
+def removeData(days):
     session = load_session()
     target_date = datetime.now().date() + timedelta(days=-days)
     try:
@@ -138,15 +138,16 @@ def main():
     if int(args['--days']) == 0:
         target_date = datetime.now().date()
         if os.path.exists("../TopicDiscovery/predict/top/{}.json".format(target_date)):
-            remove_data(int(args['--days']))
+            removeData(int(args['--days']))
             parseDoc(access_token, int(args['--days']))
             aggregate(int(args['--days']))
         else:
             logger.error("not found today's topic model")
             return
     for day in range(int(args['--days']),0,-1):
-        if args['--all']:
-            remove_data(day)
+        # if args['--all']:
+        #     remove_data(day)
+        removeData(day)
         parseDoc(access_token, day)
         aggregate(day)
 
